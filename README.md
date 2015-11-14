@@ -5,6 +5,12 @@
 Log2JSON is a small lib that allows you to transform nginx/apache/whatever
 logs to JSON.
 
+Install it will npm / cnpm:
+
+```ruby
+$ npm install log2json
+```
+
 ## Usage
 
 Run it like:
