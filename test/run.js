@@ -19,16 +19,9 @@ var the1stobj = {
   "city": "-",
   "latitude": 35,
   "longitude": 105,
-  "query": {
-    "test": "1st"
-  },
+  "query": { "test": "1st" },
   "userAgent": "Mozilla/5.0 (Linux; Android 4.4.4; m1 note Build/KTU84P) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/33.0.0.0 Mobile Safari/537.36 Proxy/cootekservice Proxy/cootekservice",
-  "arr": [
-    "a",
-    "b",
-    "c",
-    "d"
-  ],
+  "arr": [ "a", "b", "c", "d" ],
   "transformed": "fortestonly"
 };
 
@@ -75,7 +68,7 @@ function test(path) {
     console.log('✖  item is not mapped %s', item);
   });
 
-  if(!obj.notMappedField12 === 'key is missing') {
+  if(obj.notMappedField12 === 'key is missing') {
     console.log('✓  when key is missing, will mapping as `notMappedFieldN`, like `%s`', 'notMappedField12');
   } else {
     fail++;
