@@ -1,0 +1,12 @@
+{
+  "name": "node-logformat",
+  "version": "1.0.0",
+  "description": "transform nginx log to JSON",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test/run.js"
+  },
+  "keywords": ["nginx", "logformat", "JSON"],
+  "author": "sofish <happinesz@gmail.com> (http://sofi.sh/)",
+  "license": "MIT"
+}
