@@ -43,6 +43,10 @@ function parser(configure, callback) {
     ret = ret.split(/\n+/);
     ret = ret.map(item => item && mapper(item.split(configure.separator), configure.map));
 
+    // if configure.dist is a function, instead of creating a new file, exec it with the result
+    // the result should be an array
+    if(typeof configure.dist === 'function') return configure.dist(ret);
+
     fs.writeFile(configure.dist, JSON.stringify(ret), err => {
       if(err) throw err;
       if(configure.removeSrc) fs.unlinkSync(configure.src); // remove src file when done

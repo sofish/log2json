@@ -10,6 +10,7 @@ var src = path.join(__dirname, './log');
 var dist = path.join(__dirname, './log.json');
 var removeSrc = false;
 var configure = {map, separator, src, dist, removeSrc};
+var configure2 = {map, separator, src, dist: jsonCallback , removeSrc};
 
 var the1stobj = {
   "createdAt": "2015-11-14T23:59:14+08:00",
@@ -35,11 +36,18 @@ log2json(configure, ret => {
   test(ret);
 });
 
+log2json(configure2);
+
 function transform(text) {
   var value= '';
   var name = 'transformed';
   if(text) value = text.toLowerCase();
   return {name, value};
+}
+
+function jsonCallback(ret) {
+  if(ret.length === 9) return console.log('✓  [2] JSON object is returned instead of creating new file');
+  console.log('✘  [2] expected an array');
 }
 
 function test(path) {
