@@ -9,7 +9,7 @@ var separator = '•-•';
 var src = path.join(__dirname, './log');
 var dist = path.join(__dirname, './log.json');
 var removeSrc = false;
-var configure = {map, separator, src, dist, removeSrc};
+var configure = {map, separator, src, dist, removeSrc, callback};
 var configure2 = {map, separator, src, dist: jsonCallback , removeSrc};
 
 var the1stobj = {
@@ -28,18 +28,16 @@ var the1stobj = {
   "notMappedField12": "key is missing"
 };
 
-log2json(configure, (err, ret) => {
+log2json(configure);
+log2json(configure2);
 
+function callback(err, ret) {
   if(err) throw err;
-
   if(!ret) console.log('✓ it\'s an empty file');
   if(ret) console.log(`✓  JSON is generated: ${shortPath(ret)}`);
 
-  // run test
-  test(ret);
-});
-
-log2json(configure2);
+  test(ret);   // run test
+}
 
 function transform(text) {
   var value= '';

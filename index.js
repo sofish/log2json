@@ -15,7 +15,8 @@ function parser(configure, callback) {
    *      src:        'path/to/src/file',                         // {string}
    *      dist:       'path/to/dist/file',                        // {string}
    *      separator:  '•-•',                                      // {string|regexp} beware about to choose a right one
-   *
+   *      removeSrc:  true                                        // {boolean} [optional] by default is true
+
    *      map:        ['filedName', fn, 'name|FORMAT', ...]       // {array}
    *
    *                  // 1. {string} fieldName, the key/value pairs' key
@@ -24,20 +25,20 @@ function parser(configure, callback) {
    *                  //    `foo=bar&hello=world` to { name: 'query, value: { 'foo: 'bar', hello: 'world' } }
    *                  // 3. {string} separate the filedName and built-in format to transform the origin value
    *                  //    eg. 'name|url' will parse the origin value as a queryString
-   *      removeSrc:  true                                        // {boolean} by default is true
-   *    }
-   *  @param {function} callback(err, result)
+   *
+   *      callback: callback(err, result)
    *                  // {string} result
    *                  // 1. if the file is empty, returns an empty string and won't create a new file
    *                  // 2. if a new file is created returns the file path
+   *    }
    */
 
   if(typeof configure.removeSrc === 'undefined') configure.removeSrc = true;
   fs.readFile(configure.src, ENCODING, (err, ret) => {
-    if(err) return callback(err);
+    if(err) throw err;
 
     // file is empty
-    if(!ret) callback(null, '');
+    if(!ret) configure.callback(null, '');
 
     // separate with new line
     ret = ret.split(/\n+/);
@@ -45,12 +46,15 @@ function parser(configure, callback) {
 
     // if configure.dist is a function, instead of creating a new file, exec it with the result
     // the result should be an array
-    if(typeof configure.dist === 'function') return configure.dist(ret);
+    if(typeof configure.dist === 'function') {
+      if(configure.removeSrc) fs.unlinkSync(configure.src);
+      return configure.dist(ret);
+    }
 
     fs.writeFile(configure.dist, JSON.stringify(ret), err => {
       if(err) throw err;
-      if(configure.removeSrc) fs.unlinkSync(configure.src); // remove src file when done
-      callback(null, configure.dist);
+      if(configure.removeSrc) fs.unlinkSync(configure.src);
+      configure.callback(null, configure.dist);
     });
   });
 }
