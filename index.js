@@ -32,6 +32,7 @@ function parser(configure, callback) {
    *                  // 2. if a new file is created returns the file path
    */
 
+  if(typeof configure.removeSrc === 'undefined') configure.removeSrc = true;
   fs.readFile(configure.src, ENCODING, (err, ret) => {
     if(err) throw err;
 
@@ -44,6 +45,7 @@ function parser(configure, callback) {
 
     fs.writeFile(configure.dist, JSON.stringify(ret), err => {
       if(err) throw err;
+      if(configure.removeSrc) fs.unlinkSync(configure.src); // remove src file when done
       callback(configure.dist);
     });
   });

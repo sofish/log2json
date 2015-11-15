@@ -1,7 +1,8 @@
 'use strict';
 
-var logFormat = require('../');
+var log2json = require('../');
 var path = require('path');
+var fs = require('fs');
 var map = ['createdAt', 'origin', 'xForwardFor', 'referrer', 'country', 'city',
            'latitude|number', 'longitude|number', 'query|url', 'userAgent', 'arr|array', transform];
 var separator = '•-•';
@@ -26,9 +27,9 @@ var the1stobj = {
   "notMappedField12": "key is missing"
 };
 
-logFormat(configure, ret => {
+log2json(configure, ret => {
   if(!ret) console.log('✓ it\'s an empty file');
-  if(ret) console.log(`✓  JSON is generated: ${ret}`);
+  if(ret) console.log(`✓  JSON is generated: ${shortPath(ret)}`);
 
   // run test
   test(ret);
@@ -63,17 +64,33 @@ function test(path) {
         (obj[item] && typeof obj[item] === 'object' && JSON.stringify(the1stobj[item]) === JSON.stringify(obj[item]))
       ) return console.log('✓  mapped as `%s` with right value', item);
       fail++;
-      return console.log(`✖  mapped, but the expected value of \`${item}\` is ${the1stobj[item]}`);
+      return console.log(`✘  mapped, but the expected value of \`${item}\` is ${the1stobj[item]}`);
     }
     fail++;
-    console.log('✖  item is not mapped %s', item);
+    console.log('✘  item is not mapped %s', item);
   });
 
   if(obj.notMappedField12 === the1stobj.notMappedField12) {
-    console.log('✓  when key is missing, will mapping as `notMappedFieldN`, like `%s`', 'notMappedField12');
+    console.log('✓  when key is missing, should mapped as `notMappedFieldN`, like `%s`', 'notMappedField12');
   } else {
     fail++;
-    console.log('✖  notMappedField12 is not mapped');
+    console.log('✘  notMappedField12 is not mapped');
+  }
+
+  var isSrcExists = true;
+  try {
+    isSrcExists = fs.statSync(configure.src).isFile();
+  } catch(e) {
+    isSrcExists = false;
+  }
+
+  var short = shortPath(configure.src);
+  if(configure.removeSrc) {
+    let icon = isSrcExists ? '✘' : '✓';
+    console.log(`${icon}  when \`removeSrc = true\` ${short} should be removed`);
+  } else {
+    let icon = isSrcExists ? '✓' : '✘';
+    console.log(`${icon}  when \`removeSrc = false\` ${short} should exists`);
   }
 
   console.log();
@@ -89,4 +106,9 @@ function kv(name, value, i) {
   if(candidateKey[1]) return {name: candidateKey[0], directive: candidateKey[1]};
 
   return name;
+}
+
+function shortPath(str) {
+  if(str.length < 25) return str;
+  return str.slice(0, 10) + '...' + str.slice(-10);
 }
