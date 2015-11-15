@@ -1,12 +1,27 @@
 {
   "name": "log2json",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "transform nginx log to JSON",
   "main": "index.js",
   "scripts": {
     "test": "node ./test/run.js"
   },
-  "keywords": ["nginx", "logformat", "JSON"],
+  "keywords": [
+    "nginx",
+    "logformat",
+    "JSON"
+  ],
   "author": "sofish <happinesz@gmail.com> (http://sofi.sh/)",
-  "license": "MIT"
+  "license": "MIT",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sofish/log2json.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sofish/log2json/issues"
+  },
+  "homepage": "https://github.com/sofish/log2json"
 }
