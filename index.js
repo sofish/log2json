@@ -26,7 +26,7 @@ function parser(configure, callback) {
    *                  //    eg. 'name|url' will parse the origin value as a queryString
    *      removeSrc:  true                                        // {boolean} by default is true
    *    }
-   *  @param {function} callback(result)
+   *  @param {function} callback(err, result)
    *                  // {string} result
    *                  // 1. if the file is empty, returns an empty string and won't create a new file
    *                  // 2. if a new file is created returns the file path
@@ -34,10 +34,10 @@ function parser(configure, callback) {
 
   if(typeof configure.removeSrc === 'undefined') configure.removeSrc = true;
   fs.readFile(configure.src, ENCODING, (err, ret) => {
-    if(err) throw err;
+    if(err) return callback(err);
 
     // file is empty
-    if(!ret) callback('');
+    if(!ret) callback(null, '');
 
     // separate with new line
     ret = ret.split(/\n+/);
@@ -50,7 +50,7 @@ function parser(configure, callback) {
     fs.writeFile(configure.dist, JSON.stringify(ret), err => {
       if(err) throw err;
       if(configure.removeSrc) fs.unlinkSync(configure.src); // remove src file when done
-      callback(configure.dist);
+      callback(null, configure.dist);
     });
   });
 }

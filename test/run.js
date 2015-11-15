@@ -28,7 +28,10 @@ var the1stobj = {
   "notMappedField12": "key is missing"
 };
 
-log2json(configure, ret => {
+log2json(configure, (err, ret) => {
+
+  if(err) throw err;
+
   if(!ret) console.log('✓ it\'s an empty file');
   if(ret) console.log(`✓  JSON is generated: ${shortPath(ret)}`);
 
@@ -48,6 +51,7 @@ function transform(text) {
 function jsonCallback(ret) {
   if(ret.length === 9) return console.log('✓  [2] JSON object is returned instead of creating new file');
   console.log('✘  [2] expected an array');
+  throw new Error();
 }
 
 function test(path) {
@@ -104,6 +108,8 @@ function test(path) {
   console.log();
   console.log('=  SUCCESS: %d, FAIL: %d', Object.keys(the1stobj).length - fail, fail);
   console.log('=  done!\n' );
+
+  if(fail > 0) throw new Error(`${fail} testcases failed`);
 }
 
 function kv(name, value, i) {
