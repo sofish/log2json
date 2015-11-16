@@ -34,6 +34,8 @@ function parser(configure, callback) {
    */
 
   if(typeof configure.removeSrc === 'undefined') configure.removeSrc = true;
+  if(!configure.callback) configure.callback = () => {};
+
   fs.readFile(configure.src, ENCODING, (err, ret) => {
     if(err) throw err;
 
