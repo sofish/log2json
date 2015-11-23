@@ -51,9 +51,13 @@ function parser(configure) {
   stream.on('end', () => {
     if(configure.removeSrc) fs.unlinkSync(configure.src);
     if(typeof configure.dist !== 'function') {
-      append(configure);
-      fs.appendFileSync(configure.dist, ']');
-      configure.cacheArray.length = 0;
+      if(configure.first) {
+        fs.writeFileSync(configure.dist, '[]');
+      } else {
+        append(configure);
+        fs.appendFileSync(configure.dist, ']');
+        configure.cacheArray.length = 0;
+      };
       console.log('%d records is parsed!', configure.count);
     }
     configure.callback(null, configure);
@@ -85,7 +89,7 @@ function process(configure, ret) {
 
   if(configure.first) {
     configure.first = 0;
-    fs.writeFileSync(configure.dist, '[\n');
+    fs.writeFileSync(configure.dist, '[');
   }
 
   if(configure.cacheArray.length > STOP) {
@@ -100,7 +104,7 @@ function process(configure, ret) {
  * @param {object} configure
  */
 function append(configure) {
-  fs.appendFileSync(configure.dist, JSON.stringify(configure.cacheArray).slice(1, -1) + '\n');
+  fs.appendFileSync(configure.dist, JSON.stringify(configure.cacheArray).slice(1, -1));
 }
 
 /* Mapper: mapping fields with a specific map
