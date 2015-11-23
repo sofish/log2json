@@ -4,10 +4,11 @@ const fs = require('fs');
 const ENCODING = 'utf-8';
 const format = { url, array, number };
 const keys = Object.keys(format);
-
+const STOP = 5000;
+const _extend = require('util')._extend;
 module.exports = parser;
 
-function parser(configure, callback) {
+function parser(configure) {
 
   /* Input Parser:
    * @param {object} configure
@@ -33,32 +34,73 @@ function parser(configure, callback) {
    *    }
    */
 
-  if(typeof configure.removeSrc === 'undefined') configure.removeSrc = true;
-  if(!configure.callback) configure.callback = () => {};
+  var defaults = {
+    removeSrc: true,
+    cacheArray: [],
+    first: 1,
+    count: 0,
+    buffer: '',
+    callback: () => {}
+  };
 
-  fs.readFile(configure.src, ENCODING, (err, ret) => {
-    if(err) throw err;
+  configure = _extend(defaults, configure);
+  var stream = fs.createReadStream(configure.src, ENCODING);
 
-    // file is empty
-    if(!ret) configure.callback(null, '');
-
-    // separate with new line
-    ret = ret.split(/\n+/);
-    ret = ret.map(item => item && mapper(item.split(configure.separator), configure.map));
-
-    // if configure.dist is a function, instead of creating a new file, exec it with the result
-    // the result should be an array
-    if(typeof configure.dist === 'function') {
-      if(configure.removeSrc) fs.unlinkSync(configure.src);
-      return configure.dist(ret);
+  stream.on('data', process.bind(stream, configure));
+  stream.on('error', configure.callback);
+  stream.on('end', () => {
+    if(configure.removeSrc) fs.unlinkSync(configure.src);
+    if(typeof configure.dist !== 'function') {
+      append(configure);
+      fs.appendFileSync(configure.dist, ']');
+      configure.cacheArray.length = 0;
+      console.log('%d records is parsed!', configure.count);
     }
-
-    fs.writeFile(configure.dist, JSON.stringify(ret), err => {
-      if(err) throw err;
-      if(configure.removeSrc) fs.unlinkSync(configure.src);
-      configure.callback(null, configure.dist);
-    });
+    configure.callback(null, configure);
   });
+
+}
+
+/* Process file with stream
+ * @param {object} configure
+ * @param {string} ret, string read as stream in one time
+ */
+function process(configure, ret) {
+  // line(s) is empty
+  if(!ret || !ret.trim()) return;
+
+  ret = configure.buffer + ret;
+  var pos = ret.lastIndexOf('\n');
+  configure.buffer = ret.slice(pos + 1);
+  ret = ret.slice(0, pos);
+  ret = ret.split(/\n+/);
+  ret = ret.map(item => item && mapper(item.split(configure.separator), configure.map));
+
+  if(!ret.length) return;
+  configure.count += ret.length;
+
+  // if configure.dist is a function, instead of creating a new file, exec it with the result
+  // the result should be an array
+  if(typeof configure.dist === 'function') return configure.dist(ret);
+
+  if(configure.first) {
+    configure.first = 0;
+    fs.writeFileSync(configure.dist, '[\n');
+  }
+
+  if(configure.cacheArray.length > STOP) {
+    append(configure);
+    return configure.cacheArray.length = 0;
+  }
+
+  configure.cacheArray.push.apply(configure.cacheArray, ret);
+};
+
+/* Append data to file
+ * @param {object} configure
+ */
+function append(configure) {
+  fs.appendFileSync(configure.dist, JSON.stringify(configure.cacheArray).slice(1, -1) + '\n');
 }
 
 /* Mapper: mapping fields with a specific map

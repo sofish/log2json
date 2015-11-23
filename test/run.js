@@ -33,8 +33,7 @@ log2json(configure2);
 
 function callback(err, ret) {
   if(err) throw err;
-  if(!ret) console.log('✓ it\'s an empty file');
-  if(ret) console.log(`✓  JSON is generated: ${shortPath(ret)}`);
+  if(ret) console.log(`✓  JSON is generated: ${shortPath(ret.dist)}`);
 
   test(ret);   // run test
 }
@@ -47,13 +46,13 @@ function transform(text) {
 }
 
 function jsonCallback(ret) {
-  if(ret.length === 9) return console.log('✓  [2] JSON object is returned instead of creating new file');
+  if(ret.length === 8) return console.log('✓  [2] JSON object is returned instead of creating new file');
   console.log('✘  [2] expected an array');
   throw new Error();
 }
 
-function test(path) {
-  var json = require(path);
+function test(conf) {
+  var json = require(conf.dist);
   var obj = json[0];
   var keys = Object.keys(obj);
   var arr = [];
@@ -94,6 +93,7 @@ function test(path) {
     isSrcExists = false;
   }
 
+  console.log(configure.src);
   var short = shortPath(configure.src);
   if(configure.removeSrc) {
     let icon = isSrcExists ? '✘' : '✓';
