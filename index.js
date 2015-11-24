@@ -49,7 +49,6 @@ function parser(configure) {
   stream.on('data', process.bind(stream, configure));
   stream.on('error', configure.callback);
   stream.on('end', () => {
-    if(configure.removeSrc) fs.unlinkSync(configure.src);
     if(typeof configure.dist !== 'function') {
       if(configure.first) {
         fs.writeFileSync(configure.dist, '[]');
@@ -60,6 +59,10 @@ function parser(configure) {
       };
       console.log('%d records is parsed!', configure.count);
     }
+
+    // remove when line(s) is empty
+    if(configure.first || configure.removeSrc) fs.unlink(configure.src, () => {});
+
     configure.callback(null, configure);
   });
 
@@ -70,9 +73,6 @@ function parser(configure) {
  * @param {string} ret, string read as stream in one time
  */
 function process(configure, ret) {
-  // line(s) is empty
-  if(!ret || !ret.trim()) return;
-
   ret = configure.buffer + ret;
   var pos = ret.lastIndexOf('\n');
   configure.buffer = ret.slice(pos + 1);
