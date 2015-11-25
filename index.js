@@ -58,10 +58,8 @@ module.exports = function parser(configure) {
         fs.appendFileSync(configure.dist, ']');
       };
     } else {
-      configure.dist(configure.cacheArray);
+      configure.dist(configure.cacheArray.slice());
     }
-
-    console.log('%d records is parsed!', configure.count);
 
     // remove empty file
     if(configure.first || configure.removeSrc) fs.unlink(configure.src, () => {});
@@ -95,7 +93,7 @@ function process(configure, ret) {
   if(configure.cacheArray.length > STOP) {
     // if configure.dist is a function, instead of creating a new file, exec it with the result
     // the result should be an array
-    typeof configure.dist === 'string' ? append(configure) : configure.dist(configure.cacheArray);
+    typeof configure.dist === 'string' ? append(configure) : configure.dist(configure.cacheArray.slice());
     return configure.cacheArray.length = 0;
   }
 
