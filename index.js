@@ -6,9 +6,8 @@ const format = { url, array, number };
 const keys = Object.keys(format);
 const STOP = 5000;
 const _extend = require('util')._extend;
-module.exports = parser;
 
-function parser(configure) {
+module.exports = function parser(configure) {
 
   /* Input Parser:
    * @param {object} configure
@@ -47,22 +46,27 @@ function parser(configure) {
   var stream = fs.createReadStream(configure.src, ENCODING);
 
   stream.on('data', process.bind(stream, configure));
-  stream.on('error', configure.callback);
+  stream.on('error', function() {
+    this.emit('end'); // drop file
+  });
   stream.on('end', () => {
-    if(typeof configure.dist !== 'function') {
+    if(typeof configure.dist === 'string') {
       if(configure.first) {
         fs.writeFileSync(configure.dist, '[]');
       } else {
         append(configure);
         fs.appendFileSync(configure.dist, ']');
-        configure.cacheArray.length = 0;
       };
-      console.log('%d records is parsed!', configure.count);
+    } else {
+      configure.dist(configure.cacheArray);
     }
 
-    // remove when line(s) is empty
+    console.log('%d records is parsed!', configure.count);
+
+    // remove empty file
     if(configure.first || configure.removeSrc) fs.unlink(configure.src, () => {});
 
+    configure.cacheArray.length = 0;
     configure.callback(null, configure);
   });
 
@@ -83,17 +87,15 @@ function process(configure, ret) {
   if(!ret.length) return;
   configure.count += ret.length;
 
-  // if configure.dist is a function, instead of creating a new file, exec it with the result
-  // the result should be an array
-  if(typeof configure.dist === 'function') return configure.dist(ret);
-
-  if(configure.first) {
+  if(configure.first && typeof configure.dist === 'string' ) {
     configure.first = 0;
     fs.writeFileSync(configure.dist, '[');
   }
 
   if(configure.cacheArray.length > STOP) {
-    append(configure);
+    // if configure.dist is a function, instead of creating a new file, exec it with the result
+    // the result should be an array
+    typeof configure.dist === 'string' ? append(configure) : configure.dist(configure.cacheArray);
     return configure.cacheArray.length = 0;
   }
 
