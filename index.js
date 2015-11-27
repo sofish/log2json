@@ -139,6 +139,7 @@ function pair(name, value, i) {
  * @param {string} queryString
  */
 function url(queryString) {
+  queryString = decodeURIComponent(queryString);
   queryString = queryString.split('&');
   return queryString.reduce((ret, url) => {
     url = url.split('=');
@@ -156,7 +157,7 @@ function url(queryString) {
     } else if(key.match(/\[\w+\]$/)) {
       let keys = key.split(/\[|\]/);
       let subkey = keys[1];
-      key = key[0];
+      key = keys[0];
 
       if(!ret[key]) ret[key] = {};
       ret[key][subkey] = val;
